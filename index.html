@@ -1,0 +1,57 @@
+<html>
+<head>
+<title>coinfee.net: Bitcoin payment processor featuring split payments</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<link rel="stylesheet" href="/static/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u">
+</head>
+<body>
+<div class="container">
+<h1>coinfee.net</h1>
+
+(Bitcoin payment processor. Handles single payments and split-fee payments.)
+
+<h3>Libraries</h3>
+<a href="https://github.com/coinfee/coinfee-python">coinfee-python</a>: pip install coinfee<br/>
+<a href="http://answer.market/answer/3dd12dc9-ca42-431b-abc1">PHP</a><br/>
+<a href="http://answer.market/answer/1PdDMhsUKzdk4KGThJ1yyh3kkAEaKnmLPu">Ruby</a> (<b>warning:</b> uses removed /transaction API so won't work until updated for /payment)<br/>
+<h3>Fees</h3>
+15,000 Satoshi per transaction.
+
+<h3>API</h3>
+
+<b>The old /transaction API has now been removed. Please use /payment instead.</b><br/><br/>
+
+POST to /payment with JSON of address, satoshis, unique. Optional: fee and fee_address.
+<br/><br/>
+'address' is what you want to have 'satoshis' worth of Bitcoin sent to. 'unique' is a field that you use to make sure you get a unique address per transaction, in case the address is the same. You can use an order number, a Unix timestamp, or random data.
+<br/><br/>
+Returns status, deprecated, satoshis, address.
+<br/><br/>
+'status' is True or False. False if unpaid, True if paid. If deprecated is not False, make a note of it and throw a warning that you'll see. It means the API is going to change and you are doing something out-of-date. 'satoshis' is the total amount that needs to be paid. We add a fee on top. This is satoshis + our fee (+ "fee", if you specified it), the total amount that the user needs to pay. 'address' is the address that they need to pay, so we can see payment. Once it's paid, hit the exact same endpoint again.
+<br/><br/>
+<h3>curl Examples</h3>
+<tt><pre>
+$ echo '{"satoshis": 10000, "unique": "alreadypaid", "address":"16jCrzcXo2PxadrQiQwUgwrmEwDGQYBwZq"}' | curl -si -X POST -d @- https://coinfee.net/payment
+HTTP/1.1 200 OK
+
+{"status": true, "deprecated": false, "satoshis": 25000, "address": "1CLg5quffs1LipmXq8Vbbc39Twz9NPJyNC"}
+
+$ echo '{"satoshis": 10000, "unique": "neverbeenpaid", "address":"16jCrzcXo2PxadrQiQwUgwrmEwDGQYBwZq"}' | curl -si -X POST -d @- https://coinfee.net/payment
+HTTP/1.1 200 OK
+
+{"status": false, "deprecated": false, "satoshis": 25000, "address": "1LdB5U4qJzvmC7KK9qiq8LAieN5ucSMroF"}
+
+$ echo '{"satoshis": 10000, "unique": "justatest", "address":"16jCrzcXo2PxadrQiQwUgwrmEwDGQYBwZq", "fee_address":"19x2Phcf3dqYWtfXXWcFu3YqvCQS2rb3Ct", "fee": 10000}' | curl -si -X POST -d @- localhost:8081/payment
+
+{"status": false, "deprecated": false, "satoshis": 35000, "address": "1MZv8oykgr3mdghk3MKG8iZWLJ6gFya8aF"}
+
+</pre></tt>
+
+<h3>Who uses this?</h3>
+<a href="http://answer.market/">Answer.Market</a>: Bitcoin paywall for text data<br/>
+<a href="http://sporestack.com/">SporeStack</a>: Launch disposable servers with Bitcoin
+
+<h3><a href="mailto:sega01@go-beyond.org?subject=Coinfee">Need help?</a></h3>
+<h5><i>Coinfee made by <a href="http://go-beyond.org/" target="_blank">Teran McKinney</a>.</i></h5>
+</body>
+</html>
